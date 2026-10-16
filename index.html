@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fernwood photo study</title>
+<style>
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --ink:#18202A; --muted:#566370; --line:#D8DEE4; --tint:#E5EAEF;
+  --brand:#1F6F5B; --brand-ink:#FFFFFF; --brand-soft:#DCEEE7; --danger:#B3261E; --warn:#8A5A00; --warn-soft:#FFF1CF;
+  --shadow:0 1px 2px rgba(20,30,40,.08),0 4px 14px rgba(20,30,40,.06);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161B; --surface:#1A2129; --ink:#E9EEF2; --muted:#A2AEBA; --line:#2C3641; --tint:#222B34;
+  --brand:#52BE9F; --brand-ink:#0A1D17; --brand-soft:#1B3A31; --danger:#FF8A80; --warn:#F2C260; --warn-soft:#3A2F12;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161B; --surface:#1A2129; --ink:#E9EEF2; --muted:#A2AEBA; --line:#2C3641; --tint:#222B34;
+  --brand:#52BE9F; --brand-ink:#0A1D17; --brand-soft:#1B3A31; --danger:#FF8A80; --warn:#F2C260; --warn-soft:#3A2F12;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+h1,h2,h3{line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:28px;font-weight:700} h2{font-size:21px;font-weight:700} h3{font-size:16px;font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)} .small{font-size:13px}
+/* study pages */
+.study{max-width:680px;margin-inline:auto;padding:28px 16px 64px;display:flex;flex-direction:column;gap:18px}
+.study .top{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+.kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.preview{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn);border-radius:6px;padding:8px 12px;font-size:13px}
+.btn{background:var(--brand);color:var(--brand-ink);border:0;border-radius:6px;padding:10px 18px;font-weight:700}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:6px 12px;font-size:13px}
+.link{background:none;border:0;color:var(--brand);padding:0;text-decoration:underline;font-weight:600}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer}
+.opt input{margin-top:4px;width:18px;height:18px;accent-color:var(--brand);flex:none}
+.opt.on{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field input[type=text],.field textarea{border:1px solid var(--line);border-radius:6px;padding:9px 10px;background:var(--surface)}
+.scale{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.scale label{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:8px 0;background:var(--surface);cursor:pointer}
+.scale input{accent-color:var(--brand)}
+.scale label:has(input:checked){border-color:var(--brand);color:var(--ink);box-shadow:inset 0 0 0 1px var(--brand)}
+.ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.cam{width:100%;max-width:360px;aspect-ratio:1;border-radius:8px;background:var(--tint);overflow:hidden;position:relative;border:1px solid var(--line)}
+.cam video,.cam img{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.cam img{transform:none}
+.cam .guide{position:absolute;inset:14% 26%;border:2px dashed rgba(255,255,255,.85);border-radius:50%;pointer-events:none}
+.avatar{border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+/* platform */
+.fw{min-height:100vh}
+.fw-head{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.fw-in{max-width:1100px;margin-inline:auto;padding:8px 16px;display:flex;align-items:center;gap:14px}
+.fw-logo{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-size:22px;font-weight:700;color:var(--brand);cursor:pointer;background:none;border:0;padding:0}
+.fw-search{flex:1;max-width:340px}
+.fw-search input{width:100%;border:1px solid var(--line);background:var(--tint);border-radius:20px;padding:7px 14px}
+.fw-nav{display:flex;gap:4px;margin-left:auto;align-items:center}
+.fw-nav button{background:none;border:0;padding:8px 10px;border-radius:6px;color:var(--muted);font-weight:600;position:relative}
+.fw-nav button:hover{background:var(--tint)}
+.fw-nav .on{color:var(--brand)}
+.badge{position:absolute;top:2px;right:2px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:0 5px;line-height:16px}
+.exit{font-size:12px;color:var(--muted);background:none;border:0;text-decoration:underline;padding:4px 6px}
+.fw-grid{max-width:1100px;margin-inline:auto;padding:16px;display:grid;grid-template-columns:200px minmax(0,1fr) 250px;gap:16px;align-items:start}
+.fw-side{display:flex;flex-direction:column;gap:2px;position:sticky;top:64px}
+.fw-side div{padding:9px 10px;border-radius:6px;color:var(--muted);font-weight:600}
+.fw-side div.on{background:var(--surface);color:var(--ink)}
+.fw-feed{display:flex;flex-direction:column;gap:14px;max-width:600px;width:100%;margin-inline:auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);position:relative}
+.post-h{display:flex;gap:10px;align-items:center;padding:12px 14px}
+.post-h .who{flex:1;min-width:0;line-height:1.25}
+.post-h .who b{display:block}
+.post-t{padding:0 14px 12px;overflow-wrap:anywhere}
+.post-m{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--tint)}
+.post-m svg{display:block;width:100%;height:100%}
+.post-a{display:flex;gap:4px;padding:6px 8px;border-top:1px solid var(--line)}
+.post-a button{flex:1;background:none;border:0;padding:8px;border-radius:6px;color:var(--muted);font-weight:600}
+.post-a button:hover{background:var(--tint)}
+.dots{background:none;border:0;font-size:20px;line-height:1;padding:4px 10px;border-radius:6px;color:var(--muted)}
+.dots:hover{background:var(--tint)}
+.menu{position:absolute;right:10px;top:46px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);min-width:210px;padding:4px;z-index:3}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 10px;border-radius:6px}
+.menu button:hover{background:var(--tint)}
+.gone{padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.fw-rail{position:sticky;top:64px;display:flex;flex-direction:column;gap:10px}
+.fw-rail .card{padding:14px;display:flex;flex-direction:column;gap:10px}
+.contact{display:flex;gap:10px;align-items:center}
+.dotg{width:9px;height:9px;border-radius:50%;background:#3FAE6A;margin-left:auto}
+.overlay{position:fixed;inset:0;background:rgba(10,15,20,.55);z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}
+.overlay.top{z-index:30}
+.modal{background:var(--surface);border-radius:12px;width:100%;max-width:520px;max-height:92vh;overflow:auto;display:flex;flex-direction:column}
+.modal.wide{max-width:720px}
+.m-h{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;position:sticky;top:0;background:var(--surface)}
+.m-b{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.m-f{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;bottom:0;background:var(--surface)}
+.x{background:none;border:0;font-size:22px;line-height:1;padding:2px 8px;color:var(--muted)}
+.rrow{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.rrow:last-child{border-bottom:0}
+.rrow input{margin-top:3px;width:18px;height:18px;accent-color:var(--brand);flex:none}
+.rrow b{display:block;font-weight:600}
+.doc{display:flex;flex-direction:column;gap:14px}
+.doc h3{margin-top:6px}
+.doc p{max-width:64ch}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:40;font-size:14px}
+/* protect */
+.meter{height:12px;border-radius:6px;background:var(--tint);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--brand);transition:width .25s}
+.meter.bad i{background:var(--danger)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.tog{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.tog:first-of-type{border-top:0}
+.tog input{width:18px;height:18px;margin-top:3px;accent-color:var(--brand);flex:none}
+ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px}
+.log{font:12px/1.4 Consolas,Menlo,monospace;width:100%;min-height:160px;border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--surface)}
+@media(max-width:900px){.fw-grid{grid-template-columns:minmax(0,1fr)}.fw-side,.fw-rail{display:none}.fw-search{display:none}}
+@media(max-width:560px){.overlay{padding:0;align-items:stretch}.modal{max-width:none;max-height:none;border-radius:0}.fw-nav button{padding:8px 6px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function(){
+'use strict';
+/* ================= CONFIG (edit these) ================= */
+const CONFIG={
+  ENDPOINT:'',                       // Google Apps Script web app URL. Blank means preview mode: nothing is sent.
+  TOKEN:'change-me',                 // Must match TOKEN in Code.gs. Filters stray traffic. Not a secret.
+  STUDY_VERSION:'0.1-prototype',
+  ARMS:['status_quo','direct'],
+  DIRECT_FIRST:true,                 // In the direct arm, the AI option is listed first. Everything else is shuffled in both arms.
+  SUBJECT_MODE:'choice',             // 'choice' lets the participant pick self or stand-in. 'standin' forces the stand-in.
+  STANDIN_NAME:'Jordan Ellis',
+  COMPLETION_URL:'',                 // Prolific completion URL
+  COMPLETION_CODE:'REPLACE-ME',
+  GIVE_UP_AFTER_MS:150000,           // The "I'd stop here" button always exists. This only brightens it.
+  LAST_REVIEWED:'[add date]'
+};
+const PREVIEW=!CONFIG.ENDPOINT;
+
+/* ================= pathways and policy text (placeholders to pretest) ================= */
+const PATHS={
+  ip:{label:'Copyright or intellectual property',hint:'Someone is using creative work without permission'},
+  imp:{label:'Impersonation or fake account',hint:'Someone is pretending to be a person, group or brand'},
+  priv:{label:'Privacy violation',hint:'Personal information or images shared without permission'},
+  har:{label:'Harassment or bullying',hint:'Abuse, threats or repeated unwanted contact'},
+  nud:{label:'Nudity or sexual content',hint:'Content that shows nudity or sexual activity'},
+  scam:{label:'Spam, scam or misleading content',hint:'Content meant to deceive people'},
+  ai:{label:'AI-generated or manipulated image of a real person',hint:'An image made or changed with AI that shows a real person'},
+  other:{label:'Something else',hint:'None of the options above fit'}
+};
+const ARM_PATHS={status_quo:['ip','imp','priv','har','nud','scam','other'],direct:['ai','ip','imp','priv','har','nud','scam','other']};
+const FORMS={
+  ip:[{t:'radio',n:'owner',l:'Who owns the work?',o:['I do','Someone I represent','I am not sure']},{t:'text',n:'desc',l:'Describe the work and where it appears (optional)'},{t:'check',n:'ack',l:'I believe in good faith that this use is not authorized.',req:1}],
+  imp:[{t:'radio',n:'who',l:'Who is being impersonated?',o:['Me','Someone I know','A public figure or brand']},{t:'text',n:'desc',l:'Tell us more (optional)'}],
+  priv:[{t:'radio',n:'what',l:'What was shared?',o:['Personal information','An image of me or someone I know','Something else']},{t:'text',n:'desc',l:'Tell us more (optional)'}],
+  har:[{t:'radio',n:'who',l:'Who is being targeted?',o:['Me','Someone I know','A group']},{t:'text',n:'desc',l:'Tell us more (optional)'}],
+  nud:[{t:'radio',n:'kind',l:'What does the content show?',o:['Nudity','Sexual activity','Not sure']},{t:'text',n:'desc',l:'Tell us more (optional)'}],
+  scam:[{t:'radio',n:'kind',l:'What is misleading about it?',o:['A scam or fraud','False claims','Fake engagement']},{t:'text',n:'desc',l:'Tell us more (optional)'}],
+  ai:[{t:'radio',n:'whose',l:'Whose likeness appears in the image?',o:['Me','Someone I know','A public figure']},{t:'radio',n:'consent',l:'Did they agree to this image?',o:['No','I do not know']},{t:'text',n:'desc',l:'Tell us more (optional)'}],
+  other:[{t:'text',n:'desc',l:'Tell us what is wrong',req:1}]
+};
+const POLICY={
+  intro:['These guidelines describe what is and is not allowed on Fernwood, and how to report content that may break them.','You can report posts, comments, accounts and messages from the menu on each item. Choose the option that best describes the problem. If more than one applies, choose the one that matters most to you.'],
+  sections:{
+    ip:['Copyright and intellectual property','Copyright covers original works such as photos, videos and writing. A report asks you to confirm that you own the work or act for the owner, and to describe the work.'],
+    imp:['Impersonation and fake accounts','Accounts or content that pretend to be another person, group or brand in a way that could mislead others.'],
+    priv:['Privacy','Content that shares private information or private images of a person without their permission.'],
+    har:['Harassment and bullying','Content that targets a person with abuse, threats or repeated unwanted contact.'],
+    nud:['Nudity and sexual content','Content that shows nudity or sexual activity.'],
+    scam:['Spam, scams and misleading content','Content meant to deceive people for money, to inflate engagement or to spread false claims.'],
+    ai:['AI-generated or manipulated images of real people','Images created or changed with AI tools that show a real person in a way that did not happen. A report asks whose likeness appears and whether they agreed to the image.'],
+    other:['Something else','If your concern does not match an option, tell us what is wrong in your own words.']
+  },
+  after:['What happens after you report','Our team reviews reports. We may remove content, limit an account or take no action. We will tell you that we received your report.']
+};
+
+/* ================= data: feed and subjects ================= */
+const FEED=[
+  {id:'p1',name:'Priya Natarajan',handle:'priya.n',hue:18,time:'2h',text:'Sunday reset. Farmers market haul and a very serious cup of coffee.',seed:3,likes:24,comments:3},
+  {id:'p2',name:'Dev Okafor',handle:'devokafor',hue:205,time:'3h',text:'The trail was muddier than the forecast promised. Worth it.',seed:7,likes:61,comments:9},
+  {id:'TARGET',name:'Marlo Deals',handle:'marlo.deals',hue:40,time:'1h',text:'',seed:0,likes:318,comments:42,target:true},
+  {id:'p4',name:'Camille Aubert',handle:'camille.a',hue:330,time:'6h',text:'Finished the mural. Thank you to everyone who held a ladder.',seed:11,likes:102,comments:14},
+  {id:'p5',name:'Tomas Reyes',handle:'tomasr',hue:140,time:'8h',text:'Lake was glass this morning. Nobody else was out yet.',seed:5,likes:47,comments:2},
+  {id:'p6',name:'Wren Calloway',handle:'wren.c',hue:265,time:'9h',text:'New desk setup. Cable management is a lifestyle.',seed:9,likes:33,comments:6}
+];
+const CONTACTS=[['Priya Natarajan',18],['Dev Okafor',205],['Camille Aubert',330],['Tomas Reyes',140]];
+
+/* ================= utils ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function uuid(){const a=new Uint8Array(8);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,rnd){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+let hiddenTotal=0,hiddenAt=null;
+document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=performance.now();log('page','hidden')}else if(hiddenAt!=null){hiddenTotal+=performance.now()-hiddenAt;hiddenAt=null;log('page','visible')}});
+const clock=()=>Math.round(performance.now()-hiddenTotal);
+const qs=new URLSearchParams(location.search);
+
+/* ================= state ================= */
+const P={
+  pid:qs.get('PROLIFIC_PID')||('p_'+uuid()),session:qs.get('SESSION_ID')||('s_'+uuid()),studyId:qs.get('STUDY_ID')||'',
+  screen:'consent',arm:null,assignSource:'',subject:'',name:'',srcCanvas:null,targetUrl:'',cam:'off',altConsent:false,
+  startedAt:new Date().toISOString(),completedAt:'',status:'in_progress',seq:0,events:[],queue:[],
+  t:{},view:'home',menuFor:null,gone:{},toast:'',rep:null,pol:null,polDwell:0,polOpens:0,
+  counts:{menu:0,reportOpens:0,hide:0,block:0,save:0,copy:0,like:0,comment:0,search:0,nontarget:0},
+  firstPath:'',finalPath:'',pathChanges:0,backs:0,order:[],gaveUp:0,formJson:'',survey:{},prot:{},exitOpen:false
+};
+let STREAM=null;
+
+/* ================= logging and network ================= */
+let flushTimer=null;
+function log(verb,object,result){
+  const e={pid:P.pid,session:P.session,seq:++P.seq,t_ms:clock(),ts:new Date().toISOString(),screen:P.screen,verb:verb,object:object||'',result:result==null?'':JSON.stringify(result)};
+  P.events.push(e);P.queue.push(e);
+  if(P.queue.length>=12)flush();else{clearTimeout(flushTimer);flushTimer=setTimeout(flush,1500)}
+}
+function post(payload){
+  if(PREVIEW)return Promise.resolve();
+  payload.token=CONFIG.TOKEN;
+  return fetch(CONFIG.ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),keepalive:true});
+}
+function flush(){
+  if(!P.queue.length)return;
+  const rows=P.queue.splice(0,P.queue.length);
+  if(PREVIEW)return;
+  post({type:'events',rows:rows}).catch(()=>{P.queue=rows.concat(P.queue)});
+}
+function dur(a,b){return(P.t[a]!=null&&P.t[b]!=null)?P.t[b]-P.t[a]:''}
+function summary(){
+  const s=P.survey;
+  return {pid:P.pid,session_id:P.session,study_id:P.studyId,study_version:CONFIG.STUDY_VERSION,arm:P.arm,assign_source:P.assignSource,subject:P.subject,
+    name_given:P.name?1:0,started_at:P.startedAt,completed_at:P.completedAt,status:P.status,
+    device:(/Mobi|Android|iPhone/i.test(navigator.userAgent)?'mobile':'desktop'),viewport:innerWidth+'x'+innerHeight,
+    menu_first_ms:dur('task_start','menu_open'),discovery_ms:dur('task_start','post_seen'),to_report_ms:dur('post_seen','report_open'),
+    decision_ms:dur('report_open','first_select'),select_to_next_ms:dur('first_select','next'),report_total_ms:dur('report_open','submit'),
+    task_total_ms:dur('task_start','submit'),policy_opens:P.polOpens,policy_dwell_ms:Math.round(P.polDwell),
+    first_path:P.firstPath,final_path:P.finalPath,path_changes:P.pathChanges,back_count:P.backs,option_order:P.order.join('>'),
+    report_opens:P.counts.reportOpens,hide_count:P.counts.hide,block_count:P.counts.block,nontarget_report:P.counts.nontarget,gave_up:P.gaveUp,
+    form_json:P.formJson,q_clarity:s.clarity||'',q_confidence:s.confidence||'',q_ai_look:s.ailook||'',q_realism:s.realism||'',
+    q_prior_report:s.prior||'',q_best_describes:s.desc||'',q_first_look_text:s.text||'',prot_json:JSON.stringify(P.prot),hidden_ms:Math.round(hiddenTotal)};
+}
+function sendSummary(){flush();return post({type:'summary',row:summary()})}
+async function assignArm(){
+  const forced=qs.get('arm');
+  if(PREVIEW&&CONFIG.ARMS.includes(forced)){P.assignSource='url_preview';return forced}
+  if(!PREVIEW){
+    try{
+      const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),4000);
+      const r=await fetch(CONFIG.ENDPOINT+'?action=assign&token='+encodeURIComponent(CONFIG.TOKEN)+'&pid='+encodeURIComponent(P.pid),{cache:'no-store',signal:ctl.signal});
+      clearTimeout(to);const j=await r.json();
+      if(j&&CONFIG.ARMS.includes(j.arm)){P.assignSource='server';return j.arm}
+    }catch(e){}
+  }
+  const a=new Uint32Array(1);crypto.getRandomValues(a);P.assignSource='client';return CONFIG.ARMS[a[0]%CONFIG.ARMS.length];
+}
+
+/* ================= images (all local) ================= */
+function drawAvatar(ctx,w,h,o){
+  ctx.fillStyle=o.bg;ctx.fillRect(0,0,w,h);
+  ctx.fillStyle=o.shirt;ctx.beginPath();ctx.ellipse(w/2,h*1.02,w*.44,h*.32,0,Math.PI,2*Math.PI);ctx.fill();
+  ctx.fillStyle=o.skin;ctx.fillRect(w*.43,h*.62,w*.14,h*.2);
+  ctx.fillStyle=o.hair;ctx.beginPath();ctx.ellipse(w/2,h*.43,w*.27,h*.3,0,0,7);ctx.fill();
+  ctx.fillStyle=o.skin;ctx.beginPath();ctx.ellipse(w/2,h*.47,w*.22,h*.27,0,0,7);ctx.fill();
+  ctx.fillStyle=o.hair;ctx.beginPath();ctx.ellipse(w/2,h*.28,w*.24,h*.12,0,Math.PI,2*Math.PI);ctx.fill();
+  ctx.fillStyle='#2a2320';[.42,.58].forEach(x=>{ctx.beginPath();ctx.arc(w*x,h*.48,w*.017,0,7);ctx.fill()});
+  ctx.strokeStyle='#2a2320';ctx.lineWidth=w*.008;ctx.beginPath();ctx.moveTo(w*.39,h*.43);ctx.lineTo(w*.45,h*.42);ctx.moveTo(w*.55,h*.42);ctx.lineTo(w*.61,h*.43);ctx.stroke();
+  ctx.beginPath();ctx.arc(w/2,h*.55,w*.06,.15*Math.PI,.85*Math.PI);ctx.stroke();
+}
+function standinCanvas(){
+  const c=document.createElement('canvas');c.width=c.height=512;
+  drawAvatar(c.getContext('2d'),512,512,{bg:'#cfd8dc',shirt:'#3b5b7a',skin:'#c68b64',hair:'#2b1d16'});return c;
+}
+function avgColor(ctx,x,y,w,h){const d=ctx.getImageData(x,y,w,h).data;let r=0,g=0,b=0,n=d.length/4;for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2]}return[Math.round(r/n),Math.round(g/n),Math.round(b/n)]}
+function composeTarget(src){
+  const W=960,H=720,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const sx=src.getContext('2d');
+  const skin=avgColor(sx,src.width*.42,src.height*.44,src.width*.16,src.height*.14);
+  const hairC=avgColor(sx,src.width*.3,src.height*.02,src.width*.4,src.height*.08);
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2d3a63');g.addColorStop(.55,'#b5617a');g.addColorStop(1,'#f0a868');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const r=mulberry32(hash(P.pid));
+  for(let i=0;i<14;i++){x.fillStyle='rgba(255,255,255,'+(.04+r()*.07)+')';x.beginPath();x.arc(r()*W,r()*H*.6,20+r()*60,0,7);x.fill()}
+  let bx=0;while(bx<W){const bw=50+r()*70,bh=120+r()*220;x.fillStyle='rgba(24,28,52,.82)';x.fillRect(bx,H-bh,bw,bh);for(let k=0;k<10;k++){if(r()>.5){x.fillStyle='rgba(255,214,140,.7)';x.fillRect(bx+8+r()*(bw-18),H-bh+10+r()*(bh-30),6,8)}}bx+=bw+4}
+  x.fillStyle='#1f3b4d';x.beginPath();x.moveTo(170,H);x.quadraticCurveTo(190,470,330,440);x.lineTo(630,440);x.quadraticCurveTo(770,470,790,H);x.closePath();x.fill();
+  x.fillStyle='#f4f1ee';x.beginPath();x.moveTo(420,440);x.lineTo(540,440);x.lineTo(480,H);x.closePath();x.fill();
+  x.fillStyle='rgb('+skin.join(',')+')';x.fillRect(430,360,100,100);
+  x.fillStyle='rgb('+hairC.join(',')+')';x.beginPath();x.ellipse(480,230,175,195,0,0,7);x.fill();
+  x.fillStyle='rgb('+skin.join(',')+')';x.beginPath();x.ellipse(480,262,150,190,0,0,7);x.fill();
+  const pw=420,ph=520,p=document.createElement('canvas');p.width=pw;p.height=ph;const px=p.getContext('2d');
+  const side=Math.min(src.width,src.height)*.78,ox=(src.width-side)/2,oy=(src.height-side)*.4;
+  px.drawImage(src,ox,oy,side,side*1.2>src.height?src.height-oy:side*1.2,0,0,pw,ph);
+  px.globalCompositeOperation='destination-in';px.save();px.translate(pw/2,ph/2);px.scale(1,ph/pw);
+  const m=px.createRadialGradient(0,0,pw*.22,0,0,pw*.5);m.addColorStop(0,'rgba(0,0,0,1)');m.addColorStop(1,'rgba(0,0,0,0)');px.fillStyle=m;px.fillRect(-pw/2,-pw/2,pw,pw);px.restore();
+  x.drawImage(p,480-pw*.36,262-ph*.38,pw*.72,ph*.76);
+  x.globalCompositeOperation='soft-light';x.fillStyle='rgba(255,170,120,.28)';x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
+  const vg=x.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.85);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.35)');x.fillStyle=vg;x.fillRect(0,0,W,H);
+  for(let i=0;i<9000;i++){x.fillStyle='rgba('+(r()>.5?255:0)+','+(r()>.5?255:0)+',255,.035)';x.fillRect(r()*W,r()*H,1.5,1.5)}
+  x.fillStyle='rgba(15,20,35,.78)';x.fillRect(0,H-74,W,74);x.fillStyle='#fff';x.font='700 30px system-ui,Arial,sans-serif';x.textAlign='center';x.fillText('30 DAY PAYCHECK CHALLENGE',W/2,H-27);
+  return c.toDataURL('image/jpeg',.88);
+}
+function sceneSVG(seed){
+  const r=mulberry32(seed*7919+13),hue=Math.floor(r()*360);
+  const sky=`hsl(${hue},55%,${68+Math.floor(r()*12)}%)`,sky2=`hsl(${(hue+40)%360},60%,${82}%)`;
+  const hill=(y,l,o)=>`<path d="M0 ${y} Q ${150+r()*100} ${y-70-r()*40} ${300+r()*80} ${y-10} T 600 ${y-20+o} V400 H0Z" fill="hsl(${(hue+120+o*3)%360},${30+o}%,${l}%)"/>`;
+  return `<svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Photo"><defs><linearGradient id="s${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky}"/><stop offset="1" stop-color="${sky2}"/></linearGradient></defs><rect width="600" height="400" fill="url(#s${seed})"/><circle cx="${120+r()*360}" cy="${90+r()*60}" r="${28+r()*20}" fill="rgba(255,250,230,.9)"/>${hill(250,46,0)}${hill(300,38,8)}${hill(350,30,14)}</svg>`;
+}
+function initials(n){return n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}
+function avatar(n,hue,size){return `<span class="avatar" style="width:${size}px;height:${size}px;background:hsl(${hue},45%,42%);font-size:${Math.round(size*.38)}px" aria-hidden="true">${esc(initials(n))}</span>`}
+function subjName(){return P.subject==='self'?(P.name||'you'):CONFIG.STANDIN_NAME}
+
+/* ================= views ================= */
+const LEAF='<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="13" fill="currentColor"/><path d="M13 21V9M13 15c-3 0-5-2-5-5 3 0 5 2 5 5zm0-3c0-3 2-5 5-5 0 3-2 5-5 5z" stroke="var(--surface)" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>';
+function topbar(step){return `<div class="top"><span>${step}</span><button class="exit" data-act="exit">Exit study</button></div>`}
+function previewNote(){return PREVIEW?'<div class="preview">Preview mode. Nothing you do here is sent anywhere.'+(P.arm?' Arm: <b>'+esc(P.arm)+'</b>.':'')+'</div>':''}
+
+function vConsent(){return `<main class="study">${previewNote()}${topbar('Step 1 of 5')}
+<div><p class="kicker">Research study</p><h1 style="margin-top:6px">Photos and social media</h1></div>
+<div class="sheet"><p><b>Placeholder.</b> Replace this section with the consent language approved by your institutional review board.</p>
+<p>In this study you will use a made-up social media site and answer a few questions. It takes about 10 to 15 minutes. You may be asked to use a photo of yourself, or you can use a stand-in instead. A photo you choose stays on your device. It is not uploaded or saved.</p>
+<p>We record what you click and how long you take. We do not record your photo, your face or your name.</p>
+<label class="opt"><input type="checkbox" id="c1"><span>I am 18 or older.</span></label>
+<label class="opt"><input type="checkbox" id="c2"><span>I understand that I can stop at any time by choosing Exit study.</span></label>
+<label class="opt"><input type="checkbox" id="c3"><span>I understand that a photo I choose stays on my device and is not uploaded or saved.</span></label>
+<div class="row"><button class="btn" id="goc" data-act="consent" disabled>Continue</button></div></div></main>`}
+
+function vSetup(){
+  const self=P.subject==='self',choice=CONFIG.SUBJECT_MODE==='choice';
+  let body='';
+  if(self){
+    body=`<div class="sheet"><h3>Your photo</h3><p class="muted">Take a photo or choose one. Face the camera with your face in the circle. It never leaves your device.</p>
+    ${P.cam==='ready'?`<div class="cam"><img alt="Your photo preview" src="${P.srcCanvas.toDataURL('image/jpeg',.8)}"></div><div class="row"><button class="btn ghost small" data-act="cam-redo">Choose a different photo</button></div>`
+    :P.cam==='live'?`<div class="cam"><video id="cam" autoplay playsinline muted></video><div class="guide"></div></div><div class="row"><button class="btn" data-act="cam-snap">Take photo</button><button class="btn ghost small" data-act="cam-off">Cancel</button></div>`
+    :`<div class="row"><button class="btn" data-act="cam-on">Use my camera</button><label class="btn ghost" style="display:inline-block">Choose a photo<input id="file" type="file" accept="image/*" capture="user" hidden></label></div>${P.camErr?'<p class="small muted">The camera is not available here. You can choose a photo instead.</p>':''}`}
+    <div class="field"><label for="nm">First name or nickname to use in the story (optional)</label><input id="nm" type="text" maxlength="24" value="${esc(P.name)}"></div>
+    <label class="opt ${P.altConsent?'on':''}"><input type="checkbox" id="altc" ${P.altConsent?'checked':''}><span>I agree that this page may alter my photo on my device to make a fake post for this study. The altered image is not uploaded or saved.</span></label></div>`;
+  }else if(P.subject==='standin'){
+    body=`<div class="sheet"><h3>Your stand-in</h3><div class="row">${avatar(CONFIG.STANDIN_NAME,210,64)}<div><b>${esc(CONFIG.STANDIN_NAME)}</b><p class="muted">A friend you have known for years. For this study, imagine you know ${esc(CONFIG.STANDIN_NAME.split(' ')[0])} well.</p></div></div></div>`;
+  }
+  const ready=self?(P.cam==='ready'&&P.altConsent):!!P.subject;
+  return `<main class="study">${previewNote()}${topbar('Step 2 of 5')}<div><p class="kicker">Set up</p><h1 style="margin-top:6px">Who will appear in the story?</h1></div>
+  ${choice?`<div class="stack-s" style="display:flex;flex-direction:column;gap:10px"><label class="opt ${self?'on':''}"><input type="radio" name="subj" data-act="subj" data-k="self" ${self?'checked':''}><span><b>A photo of me</b><br><span class="muted">The story uses your own photo. It stays on your device.</span></span></label>
+  <label class="opt ${P.subject==='standin'?'on':''}"><input type="radio" name="subj" data-act="subj" data-k="standin" ${P.subject==='standin'?'checked':''}><span><b>A stand-in friend</b><br><span class="muted">The story uses a made-up friend you imagine knowing.</span></span></label></div>`:''}
+  ${body}<div class="row"><button class="btn" data-act="setup-next" ${ready?'':'disabled'}>Continue</button></div></main>`;
+}
+function vBrief(){const n=P.subject==='self'?'you':CONFIG.STANDIN_NAME.split(' ')[0];
+  return `<main class="study">${previewNote()}${topbar('Step 3 of 5')}<div><p class="kicker">Your task</p><h1 style="margin-top:6px">Scroll through Fernwood</h1></div>
+  <div class="sheet"><p>Fernwood is a made-up social media site. You are catching up on your feed.</p>
+  ${P.subject==='self'?'<p>As you scroll, you will come across a post that shows an image of you. You did not make this post and you did not agree to it.</p>':`<p>As you scroll, you will come across a post that shows an image of your friend ${esc(CONFIG.STANDIN_NAME.split(' ')[0])}. You know ${esc(CONFIG.STANDIN_NAME.split(' ')[0])} did not post it and would never want it posted.</p>`}
+  <p>You decide to report it. Use Fernwood the way you normally would. There are no right or wrong answers.</p>
+  <p class="muted small">If you cannot work out how to report it, there is an "I would stop here" button in the report window.</p>
+  <div class="row"><button class="btn" data-act="brief-go">Open Fernwood</button></div></div></main>`}
+
+function postHTML(p){
+  const g=P.gone[p.id];
+  if(g)return `<article class="card" data-post="${p.id}"><div class="gone"><span>${g==='hidden'?'You hid this post.':'You blocked @'+esc(p.handle)+'.'}</span><span class="row"><button class="link" data-act="undo" data-k="${p.id}">Undo</button><button class="link" data-act="report-from" data-k="${p.id}">Report post</button></span></div></article>`;
+  const media=p.target?`<img class="post-m" alt="Photo in post" src="${P.targetUrl}">`:`<div class="post-m">${sceneSVG(p.seed)}</div>`;
+  const text=p.target?`Meet ${esc(subjName()==='you'?'this member':subjName())}, who replaced a full-time paycheck in 30 days. Ask ${esc(subjName()==='you'?'them':subjName())} how. Link in bio.`:esc(p.text);
+  return `<article class="card" data-post="${p.id}"><div class="post-h">${avatar(p.name,p.hue,40)}<div class="who"><b>${esc(p.name)}</b><span class="muted small">@${esc(p.handle)} &middot; ${p.time}</span></div><button class="dots" data-act="menu" data-k="${p.id}" aria-haspopup="menu" aria-expanded="${P.menuFor===p.id}" aria-label="Post options">&#8943;</button></div>
+  <div class="post-t">${text}</div>${media}<div class="post-a"><button data-act="like">Like &middot; ${p.likes}</button><button data-act="comment">Comment &middot; ${p.comments}</button><button data-act="share">Share</button></div>
+  ${P.menuFor===p.id?`<div class="menu" role="menu"><button role="menuitem" data-act="m-save" data-k="${p.id}">Save post</button><button role="menuitem" data-act="m-copy" data-k="${p.id}">Copy link</button><button role="menuitem" data-act="m-hide" data-k="${p.id}">Hide post</button><button role="menuitem" data-act="m-block" data-k="${p.id}">Block @${esc(p.handle)}</button><button role="menuitem" data-act="report-from" data-k="${p.id}">Report post</button></div>`:''}</article>`;
+}
+function policyDoc(){
+  const keys=ARM_PATHS[P.arm].filter(k=>k!=='other').concat(['other']);
+  const order=['ip','imp','priv','har','nud','scam','ai','other'].filter(k=>keys.includes(k));
+  return `<div class="doc"><p>${POLICY.intro[0]}</p><p>${POLICY.intro[1]}</p>${order.map(k=>`<div><h3>${POLICY.sections[k][0]}</h3><p>${POLICY.sections[k][1]}</p></div>`).join('')}<div><h3>${POLICY.after[0]}</h3><p>${POLICY.after[1]}</p></div></div>`;
+}
+function vPlatform(){
+  const posts=FEED.map(postHTML).join('');
+  const main=P.view==='help'?`<div class="card" style="padding:20px"><h2 style="margin-bottom:12px">Community guidelines</h2>${policyDoc()}</div>`:posts;
+  return `<div class="fw"><header class="fw-head"><div class="fw-in"><button class="fw-logo" data-act="nav-home">${LEAF}<span>Fernwood</span></button><div class="fw-search"><input id="fwq" aria-label="Search Fernwood" placeholder="Search Fernwood"></div>
+  <nav class="fw-nav"><button class="${P.view==='home'?'on':''}" data-act="nav-home">Home</button><button data-act="notif">Alerts<span class="badge">2</span></button><button class="${P.view==='help'?'on':''}" data-act="nav-help">Help</button><button class="exit" data-act="exit">Exit study</button></nav></div></header>
+  <div class="fw-grid"><aside class="fw-side"><div class="on">Home</div><div>Friends</div><div>Groups</div><div>Saved</div><div>Events</div></aside>
+  <main class="fw-feed">${main}</main>
+  <aside class="fw-rail"><div class="card"><h3>Contacts</h3>${CONTACTS.concat([[CONFIG.STANDIN_NAME,210]]).filter(c=>P.subject==='standin'||c[0]!==CONFIG.STANDIN_NAME).map(c=>`<div class="contact">${avatar(c[0],c[1],32)}<span>${esc(c[0])}</span><i class="dotg"></i></div>`).join('')}</div></aside></div>
+  ${P.rep?reportModal():''}${P.pol&&P.pol.from==='report'?policyOverlay():''}${P.toast?`<div class="toast" role="status">${esc(P.toast)}</div>`:''}</div>`;
+}
+function policyOverlay(){return `<div class="overlay top"><div class="modal wide" role="dialog" aria-modal="true" aria-label="Community guidelines"><div class="m-h"><h3>Community guidelines</h3><button class="x" data-act="pol-close" aria-label="Close">&times;</button></div><div class="m-b">${policyDoc()}</div><div class="m-f"><button class="btn small" data-act="pol-close">Back to report</button></div></div></div>`}
+function reportModal(){
+  const R=P.rep;
+  if(R.step===3)return `<div class="overlay"><div class="modal" role="dialog" aria-modal="true" aria-label="Report sent"><div class="m-h"><h3>Report sent</h3></div><div class="m-b"><p>Thanks for letting us know. We have received your report and our team will review it.</p></div><div class="m-f"><span></span><button class="btn" data-act="rep-done">Done</button></div></div></div>`;
+  if(R.step===0){
+    return `<div class="overlay"><div class="modal" role="dialog" aria-modal="true" aria-label="Report post"><div class="m-h"><h3>Report post</h3><button class="x" data-act="rep-cancel" aria-label="Close">&times;</button></div>
+    <div class="m-b"><p><b>What is going on with this post?</b></p><div role="radiogroup" aria-label="Reason">${P.order.map(k=>`<label class="rrow"><input type="radio" name="rp" data-act="rep-sel" data-k="${k}" ${R.sel===k?'checked':''}><span><b>${PATHS[k].label}</b><span class="muted small">${PATHS[k].hint}</span></span></label>`).join('')}</div>
+    <button class="link" data-act="pol-open" style="align-self:flex-start">Read the community guidelines</button></div>
+    <div class="m-f"><button class="btn ghost small" data-act="rep-giveup">I would stop here</button><span class="row"><button class="btn ghost" data-act="rep-cancel">Cancel</button><button class="btn" data-act="rep-next" ${R.sel?'':'disabled'}>Next</button></span></div></div></div>`;
+  }
+  const f=FORMS[R.sel],ok=f.every(q=>!q.req||(q.t==='check'?R.form[q.n]:(R.form[q.n]||'').trim())) && f.every(q=>q.t!=='radio'||R.form[q.n]);
+  return `<div class="overlay"><div class="modal" role="dialog" aria-modal="true" aria-label="Report details"><div class="m-h"><h3>${PATHS[R.sel].label}</h3><button class="x" data-act="rep-cancel" aria-label="Close">&times;</button></div>
+  <div class="m-b">${f.map(q=>q.t==='radio'?`<div class="field" role="radiogroup" aria-label="${esc(q.l)}"><b>${q.l}</b>${q.o.map(o=>`<label class="rrow" style="padding:8px 4px"><input type="radio" name="f_${q.n}" data-act="rep-f" data-n="${q.n}" data-v="${esc(o)}" ${R.form[q.n]===o?'checked':''}><span>${o}</span></label>`).join('')}</div>`
+    :q.t==='check'?`<label class="rrow"><input type="checkbox" data-act="rep-fc" data-n="${q.n}" ${R.form[q.n]?'checked':''}><span>${q.l}</span></label>`
+    :`<div class="field"><label for="f_${q.n}"><b>${q.l}</b></label><textarea id="f_${q.n}" rows="3" maxlength="300" data-act="rep-ft" data-n="${q.n}">${esc(R.form[q.n]||'')}</textarea></div>`).join('')}
+  <button class="link" data-act="pol-open" style="align-self:flex-start">Read the community guidelines</button></div>
+  <div class="m-f"><button class="btn ghost small" data-act="rep-giveup">I would stop here</button><span class="row"><button class="btn ghost" data-act="rep-back">Back</button><button class="btn" data-act="rep-submit" ${ok?'':'disabled'}>Submit report</button></span></div></div></div>`;
+}
+
+const LIKERT=(name,label,lo,hi)=>`<fieldset class="field" style="border:0;padding:0;margin:0"><legend><b>${label}</b></legend><div class="scale">${[1,2,3,4,5,6,7].map(i=>`<label><input type="radio" name="${name}" value="${i}" data-act="q-set" data-k="${name}"><span>${i}</span></label>`).join('')}</div><div class="ends"><span>${lo}</span><span>${hi}</span></div></fieldset>`;
+function vAfter(){return `<main class="study">${previewNote()}${topbar('Step 4 of 5')}<div><p class="kicker">A few questions</p><h1 style="margin-top:6px">How was that?</h1></div>
+  <div class="sheet">${LIKERT('clarity','It was clear where to go to report the post.','Strongly disagree','Strongly agree')}
+  ${LIKERT('confidence','I am confident I chose the option that fits best.','Strongly disagree','Strongly agree')}
+  ${LIKERT('ailook','The image in the post looked AI-generated.','Strongly disagree','Strongly agree')}
+  ${LIKERT('realism','The situation felt realistic.','Strongly disagree','Strongly agree')}
+  <div class="field"><b>Which best describes the post you came across?</b><select id="q_desc"><option value="">Choose one</option>${['An AI-generated image of a real person','A copyright problem','Someone impersonating a person','A scam','Harassment','Something else'].map(o=>`<option>${o}</option>`).join('')}</select></div>
+  <div class="field"><b>Have you ever reported something on a social media site?</b><select id="q_prior"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Prefer not to say</option></select></div>
+  <div class="field"><label for="q_text"><b>When you first opened the report menu, what were you looking for? (optional)</b></label><textarea id="q_text" rows="3" maxlength="300"></textarea></div>
+  <div class="row"><button class="btn" data-act="after-go" id="ago" disabled>Continue</button></div></div></main>`}
+function vDebrief(){
+  const fn=P.subject==='self'?'your photo':CONFIG.STANDIN_NAME;
+  return `<main class="study">${previewNote()}${topbar('Step 5 of 5')}<div><p class="kicker">About this study</p><h1 style="margin-top:6px">What was real, and what was not</h1></div>
+  <div class="sheet"><p>Fernwood is not a real site. Marlo Deals is not a real account. The post was made on your device from ${esc(fn)} and was never shared with anyone. It has now been deleted from this page.</p>
+  <p>We are studying how people find their way when they want to report an AI-generated image of a real person, and whether the options a platform shows change what people choose and how long it takes. You saw one of two versions of the reporting options. Placeholder: replace this with the debrief text approved by your institutional review board.</p>
+  <p>Nothing you chose was wrong. If this brought up something difficult, support is listed on the next page.</p>
+  <div class="row"><button class="btn" data-act="debrief-go">Continue</button></div></div></main>`;
+}
+const PROT=[
+ ['friends','Profile visible to friends only',15,'exp','Strangers cannot copy photos they cannot see.'],
+ ['albums','Photo albums set to friends only',12,'exp','Albums are where many high quality face photos sit.'],
+ ['dl','Turn off photo downloads',8,'exp','Slows down casual copying. It does not stop screenshots.'],
+ ['index','Hide profile from search engines',10,'exp','Keeps your photos out of search results.'],
+ ['loc','Remove location from photos',5,'exp','Limits what a copy reveals about you.'],
+ ['tags','Approve tags before they appear',8,'ntc','You see when someone connects your name to content.'],
+ ['alert','Set an alert for your name and check reverse image search now and then',12,'ntc','Helps you notice copies early.'],
+ ['code','Agree a verification word with family for urgent requests',10,'ntc','Helps against cloned voices and fake messages.']
+];
+function protScores(){let e=75,n=15;PROT.forEach(p=>{if(P.prot[p[0]]){if(p[3]==='exp')e-=p[2];else n+=p[2]}});return[Math.max(0,e),Math.min(100,n)]}
+function vProtect(){const s=protScores();
+  return `<main class="study" style="max-width:860px">${previewNote()}${topbar('Protecting your image')}<div><p class="kicker">What you can do</p><h1 style="margin-top:6px">Protect your image and likeness</h1><p class="muted" style="margin-top:8px;max-width:60ch">Settings reduce exposure. They cannot stop someone else from misusing a photo, and misuse is never the fault of the person in the photo. Try the settings below and watch what changes.</p></div>
+  <div class="two"><div class="sheet"><h3>Fernwood settings</h3>${PROT.map(p=>`<label class="tog"><input type="checkbox" data-act="prot" data-k="${p[0]}" ${P.prot[p[0]]?'checked':''}><span><b>${p[1]}</b><br><span class="muted small">${p[4]}</span></span></label>`).join('')}</div>
+  <div class="sheet"><h3>What your choices do <span class="muted small">(illustrative)</span></h3><div class="field"><span>How easy it is to copy your photos: <b>${s[0]}</b> of 100</span><div class="meter bad"><i style="width:${s[0]}%"></i></div></div><div class="field"><span>How likely you are to notice misuse: <b>${s[1]}</b> of 100</span><div class="meter"><i style="width:${s[1]}%"></i></div></div>
+  <p class="small muted">Some tools claim to cloak photos against AI. Evidence on how well they work is mixed, so treat them as one layer at most. Content credentials can show an image's edit history, but a missing credential does not prove an image is fake.</p></div></div>
+  <div class="sheet"><h3>If it happens to you or someone you know</h3><ol class="steps"><li><b>Save evidence first.</b> Take screenshots that show the post, the account name, the link and the date.</li><li><b>Report on the platform.</b> Choose the most specific option you can find, and keep the confirmation.</li><li><b>Tell someone you trust.</b> You do not have to deal with it alone.</li><li><b>Look for copies.</b> Use a reverse image search and check where else the image appears.</li><li><b>Use specialist help.</b> For intimate images, StopNCII.org (adults) and Take It Down from the National Center for Missing and Exploited Children (under 18) can help stop spread. Campus services, legal aid and local law enforcement may also help.</li></ol><p class="small muted">Resources last reviewed: ${CONFIG.LAST_REVIEWED}. Check that each link and service is current before you rely on it.</p></div>
+  <div class="row"><button class="btn" data-act="finish">Finish</button></div></main>`;
+}
+function csv(rows,cols){const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';return cols.join(',')+'\n'+rows.map(r=>cols.map(c=>q(r[c])).join(',')).join('\n')}
+function vDone(){
+  const logs=PREVIEW?`<div class="sheet"><h3>Preview data</h3><p class="muted small">In preview mode nothing is sent. This is what would be written to your Sheet.</p><b>Participants row</b><textarea class="log" readonly>${esc(JSON.stringify(summary(),null,1))}</textarea><b>Events</b><textarea class="log" readonly>${esc(csv(P.events,['seq','t_ms','ts','screen','verb','object','result']))}</textarea></div>`:'';
+  return `<main class="study">${previewNote()}<div><p class="kicker">Done</p><h1 style="margin-top:6px">Thank you</h1></div><div class="sheet"><p>Your responses are recorded. Your photo was never uploaded or saved.</p>${CONFIG.COMPLETION_URL?`<div class="row"><a class="btn" style="text-decoration:none" href="${esc(CONFIG.COMPLETION_URL)}">Return to Prolific</a></div>`:`<p>Completion code: <b>${esc(CONFIG.COMPLETION_CODE)}</b></p>`}</div>${logs}</main>`;
+}
+function vExit(){return `<main class="study"><div><p class="kicker">Study ended</p><h1 style="margin-top:6px">You have left the study</h1></div><div class="sheet"><p>Thank you for your time. Your photo was never uploaded or saved. Placeholder: add the withdrawal code or instructions from your institutional review board here.</p><p class="muted">If anything in this study was upsetting, you can reach support through your campus counseling service or a local crisis line. Replace this line with approved resources.</p></div></main>`}
+function exitModal(){return `<div class="overlay top"><div class="modal" role="dialog" aria-modal="true" aria-label="Exit study"><div class="m-h"><h3>Exit the study?</h3></div><div class="m-b"><p>You can stop at any time. Your photo will be cleared from this page.</p></div><div class="m-f"><button class="btn ghost" data-act="exit-no">Keep going</button><button class="btn" data-act="exit-yes">Exit study</button></div></div></div>`}
+
+function render(){
+  const v={consent:vConsent,setup:vSetup,brief:vBrief,platform:vPlatform,after:vAfter,debrief:vDebrief,protect:vProtect,done:vDone,exit:vExit}[P.screen];
+  const y=window.scrollY;
+  $('#root').innerHTML=v()+(P.exitOpen?exitModal():'');
+  if(P.screen==='setup'&&P.cam==='live'&&STREAM){const el=$('#cam');if(el)el.srcObject=STREAM}
+  if(P.screen==='platform')observeTarget();
+  window.scrollTo(0,y);
+}
+let IO=null;
+function observeTarget(){
+  if(IO)IO.disconnect();if(P.t.post_seen!=null)return;
+  const el=document.querySelector('[data-post="TARGET"]');if(!el||!('IntersectionObserver' in window))return;
+  IO=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting&&P.t.post_seen==null){P.t.post_seen=clock();log('view','target_post');IO.disconnect()}})},{threshold:.5});IO.observe(el);
+}
+function setScreen(s){P.screen=s;log('screen',s);render();window.scrollTo(0,0)}
+function toast(t){P.toast=t;render();setTimeout(()=>{P.toast='';render()},1800)}
+function endPolicy(){if(P.pol){const d=clock()-P.pol.at;P.polDwell+=d;log('policy_close',P.pol.from,{dwell_ms:d});P.pol=null}}
+function stopCam(){if(STREAM){STREAM.getTracks().forEach(t=>t.stop());STREAM=null}}
+function clearImages(){stopCam();P.srcCanvas=null;P.targetUrl=''}
+function openReport(){
+  P.counts.reportOpens++;if(P.t.report_open==null)P.t.report_open=clock();
+  P.rep={step:0,sel:null,form:{}};log('report_open','post',{n:P.counts.reportOpens});
+}
+
+/* ================= handlers ================= */
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act,k=t.dataset.k;
+  if(t.tagName==='INPUT'&&(t.type==='radio'||t.type==='checkbox'))return;
+  if(t.tagName==='TEXTAREA')return;
+  if(a==='consent'){log('consent','given',{version:CONFIG.STUDY_VERSION});P.arm=await assignArm();P.consentAt=clock();log('assign',P.arm,{source:P.assignSource});
+    P.subject=CONFIG.SUBJECT_MODE==='standin'?'standin':'';setScreen('setup');return}
+  if(a==='cam-on'){try{STREAM=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});P.cam='live';P.camErr=false;log('photo','camera_on')}catch(err){P.camErr=true;log('photo','camera_unavailable')}render();return}
+  if(a==='cam-off'){stopCam();P.cam='off';render();return}
+  if(a==='cam-snap'){const v=$('#cam');if(!v||!v.videoWidth)return;const c=document.createElement('canvas');c.width=c.height=512;const s=Math.min(v.videoWidth,v.videoHeight);c.getContext('2d').drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,512,512);P.srcCanvas=c;stopCam();P.cam='ready';log('photo','captured');render();return}
+  if(a==='cam-redo'){P.srcCanvas=null;P.cam='off';render();return}
+  if(a==='setup-next'){
+    if(P.subject==='self'){P.name=($('#nm')&&$('#nm').value.trim())||P.name;log('setup','self',{alter_consent:1,name_given:P.name?1:0})}
+    else{P.srcCanvas=standinCanvas();log('setup','standin')}
+    setScreen('brief');return}
+  if(a==='brief-go'){
+    P.targetUrl=composeTarget(P.srcCanvas);
+    const rnd=mulberry32(hash(P.pid+P.session));
+    const base=ARM_PATHS[P.arm].filter(x=>x!=='other'&&!(P.arm==='direct'&&CONFIG.DIRECT_FIRST&&x==='ai'));
+    P.order=(P.arm==='direct'&&CONFIG.DIRECT_FIRST?['ai']:[]).concat(shuffle(base,rnd)).concat(['other']);
+    P.t.task_start=clock();log('task_start','platform',{order:P.order});setScreen('platform');return}
+  if(a==='nav-home'){P.view='home';log('nav','home');render();return}
+  if(a==='nav-help'){P.view='help';log('nav','help');if(!P.pol)P.pol={at:clock(),from:'help'};P.polOpens++;log('policy_open','help');render();return}
+  if(a==='notif'||a==='like'||a==='comment'||a==='share'){if(a==='like')P.counts.like++;if(a==='comment')P.counts.comment++;log('click',a);return}
+  if(a==='menu'){P.menuFor=P.menuFor===k?null:k;P.counts.menu++;if(P.t.menu_open==null)P.t.menu_open=clock();log('menu_open',k);render();return}
+  if(a==='m-save'||a==='m-copy'){P.counts[a==='m-save'?'save':'copy']++;log('menu_action',a,{post:k});P.menuFor=null;toast(a==='m-save'?'Saved':'Link copied');return}
+  if(a==='m-hide'||a==='m-block'){const kind=a==='m-hide'?'hidden':'blocked';P.counts[kind==='hidden'?'hide':'block']++;P.gone[k]=kind;log('menu_action',a,{post:k});P.menuFor=null;render();return}
+  if(a==='undo'){delete P.gone[k];log('undo',k);render();return}
+  if(a==='report-from'){P.menuFor=null;if(k!=='TARGET'){P.counts.nontarget++;log('report_nontarget',k);toast('Imagine you are reporting the post you came across earlier.');return}openReport();render();return}
+  if(a==='pol-open'){P.pol={at:clock(),from:'report'};P.polOpens++;log('policy_open','report');render();return}
+  if(a==='pol-close'){endPolicy();render();return}
+  if(a==='rep-cancel'){log('report_cancel','step'+P.rep.step);P.rep=null;render();return}
+  if(a==='rep-giveup'){P.gaveUp=1;if(P.t.submit==null)P.t.submit=clock();log('report_giveup','step'+P.rep.step,{ms:dur('report_open','submit')});P.status='gave_up';P.rep=null;await finishTask();return}
+  if(a==='rep-next'){if(P.t.next==null)P.t.next=clock();log('report_next',P.rep.sel);P.rep.step=1;render();return}
+  if(a==='rep-back'){P.backs++;log('report_back',P.rep.sel);P.rep.step=0;render();return}
+  if(a==='rep-submit'){P.t.submit=clock();P.finalPath=P.rep.sel;P.formJson=JSON.stringify(Object.assign({},P.rep.form,{desc:P.rep.form.desc?'[given]':''}));log('report_submit',P.rep.sel);P.rep.step=3;render();return}
+  if(a==='rep-done'){P.rep=null;await finishTask();return}
+  if(a==='after-go'){const s=P.survey;s.desc=$('#q_desc').value;s.prior=$('#q_prior').value;s.text=$('#q_text').value.trim();log('survey','submitted',{clarity:s.clarity,confidence:s.confidence,ailook:s.ailook,realism:s.realism});setScreen('debrief');return}
+  if(a==='debrief-go'){clearImages();log('image','cleared');setScreen('protect');return}
+  if(a==='finish'){P.status=P.gaveUp?'gave_up':'complete';P.completedAt=new Date().toISOString();log('study','finish');P.screen='done';render();await sendSummary();return}
+  if(a==='exit'){P.exitOpen=true;render();return}
+  if(a==='exit-no'){P.exitOpen=false;render();return}
+  if(a==='exit-yes'){P.exitOpen=false;clearImages();P.status='withdrawn';P.completedAt=new Date().toISOString();log('study','withdraw');P.screen='exit';render();await sendSummary();return}
+});
+async function finishTask(){endPolicy();log('task_end','platform',{status:P.status});setScreen('after');}
+document.addEventListener('change',e=>{
+  const t=e.target,a=t.dataset&&t.dataset.act;
+  if(t.id==='c1'||t.id==='c2'||t.id==='c3'){$('#goc').disabled=!($('#c1').checked&&$('#c2').checked&&$('#c3').checked);return}
+  if(t.id==='file'&&t.files&&t.files[0]){
+    const f=t.files[0],url=URL.createObjectURL(f),img=new Image();
+    img.onload=()=>{const c=document.createElement('canvas');c.width=c.height=512;const s=Math.min(img.width,img.height);c.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,512,512);URL.revokeObjectURL(url);P.srcCanvas=c;P.cam='ready';log('photo','uploaded');render()};
+    img.onerror=()=>{URL.revokeObjectURL(url)};img.src=url;return}
+  if(t.id==='altc'){P.altConsent=t.checked;log('setup','alter_consent',{v:t.checked});P.name=($('#nm')&&$('#nm').value.trim())||P.name;render();return}
+  if(t.id==='q_desc'||t.id==='q_prior'){checkAfter();return}
+  if(a==='subj'){P.subject=t.dataset.k;log('setup','subject',{v:P.subject});render();return}
+  if(a==='q-set'){P.survey[t.dataset.k]=t.value;checkAfter();return}
+  if(a==='rep-sel'){const k=t.dataset.k;if(P.rep.sel==null){P.firstPath=k;P.t.first_select=clock();log('option_select',k,{first:1,pos:P.order.indexOf(k)})}else if(P.rep.sel!==k){P.pathChanges++;log('option_change',k,{from:P.rep.sel,pos:P.order.indexOf(k)})}P.rep.sel=k;P.rep.form={};render();return}
+  if(a==='rep-f'){P.rep.form[t.dataset.n]=t.dataset.v;render();return}
+  if(a==='rep-fc'){P.rep.form[t.dataset.n]=t.checked;render();return}
+  if(a==='prot'){P.prot[t.dataset.k]=t.checked;log('protect',t.dataset.k,{on:t.checked});render();return}
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset&&t.dataset.act==='rep-ft'){P.rep.form[t.dataset.n]=t.value;const m=document.querySelector('[data-act=rep-submit]');if(m){const f=FORMS[P.rep.sel];m.disabled=!(f.every(q=>!q.req||(q.t==='check'?P.rep.form[q.n]:(P.rep.form[q.n]||'').trim()))&&f.every(q=>q.t!=='radio'||P.rep.form[q.n]))}}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='fwq'){P.counts.search++;log('search','query',{len:e.target.value.length});e.target.value=''}
+  if(e.key==='Escape'){if(P.pol&&P.pol.from==='report'){endPolicy();render()}}
+});
+function checkAfter(){const s=P.survey;const ok=s.clarity&&s.confidence&&s.ailook&&s.realism&&$('#q_desc').value&&$('#q_prior').value;const b=$('#ago');if(b)b.disabled=!ok}
+window.addEventListener('pagehide',()=>{flush()});
+window.__FERNWOOD={P:P,summary:summary,CONFIG:CONFIG};
+log('screen','consent');render();
+})();
+</script>
+</body>
+</html>
